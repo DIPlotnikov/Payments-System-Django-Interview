@@ -1,8 +1,6 @@
-from datetime import datetime
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
-from django.db import transaction
 
 from .models import BalanceLog, Organization, Payment
 
@@ -17,7 +15,7 @@ class OrganizationHandler:
                        payment: Payment,
                        ) -> Decimal:
         """
-        Безопасное изменение баланса с транзакцией
+        Изменение баланса с транзакцией
 
         :param organization: Организация
         :param payment: Связанный платеж
@@ -80,7 +78,10 @@ class PaymentHandler:
         """
         Получение или создание платежа
 
-        :param organization:
+        :param document_date: дата документа
+        :param document_number: номер документа
+        :param amount: сумма
+        :param organization: организация
         :param operation_id: Идентификатор платежа
         :return: кортеж (Payment, created(bool))
         """
@@ -94,6 +95,9 @@ class PaymentHandler:
 
 
 class BalanceLogHandler:
+    """
+    Класс-обработчик модели лога баланса
+    """
 
     @staticmethod
     def create_balance_log(payment: Payment, organization: Organization, amount: Decimal, balance_before: Decimal,

@@ -8,6 +8,7 @@ class PaymentProcessor:
     Класс реализует бизнес логику процесса оплаты
     """
 
+    @staticmethod
     @transaction.atomic
     def payment(data: dict) -> dict:
 

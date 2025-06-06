@@ -40,6 +40,7 @@ class OrganizationBalanceView(APIView):
     def get(self, request, inn):
         try:
             balance = OrganizationHandler.get_organization_balance(inn)
+
             if balance is None:
                 return Response(
                     {"error": "Организация не найдена"},
