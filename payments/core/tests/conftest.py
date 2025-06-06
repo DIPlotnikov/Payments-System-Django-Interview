@@ -1,9 +1,24 @@
-import pytest
-from django.utils import timezone
+import uuid
 from datetime import timedelta
 from decimal import Decimal
-import uuid
 
+from rest_framework.test import APIClient
+import pytest
+from django.contrib.auth.models import User
+from django.utils import timezone
+from rest_framework_simplejwt.tokens import AccessToken
+
+@pytest.fixture
+def client():
+    return APIClient()
+
+@pytest.fixture
+def auth_client(client):
+    # Аутентификация с jwt
+    user = User.objects.create_user(username='testuser', password='testpass')
+    token = AccessToken.for_user(user)
+    client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+    return client
 
 @pytest.fixture
 def test_organization():

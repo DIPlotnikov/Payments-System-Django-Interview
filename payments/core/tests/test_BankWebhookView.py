@@ -8,10 +8,10 @@ from core.models import Organization, Payment, BalanceLog
 pytestmark = pytest.mark.django_db
 
 
-def test_bank_webhook_success(client, valid_webhook_data):
+def test_bank_webhook_success(auth_client, valid_webhook_data):
     Organization.objects.create(inn=valid_webhook_data["payer_inn"], balance=Decimal("0.00"))
 
-    response = client.post(
+    response = auth_client.post(
         '/api/webhook/bank/',
         data=json.dumps(valid_webhook_data),
         content_type='application/json'
@@ -26,16 +26,16 @@ def test_bank_webhook_success(client, valid_webhook_data):
     assert org.balance == Decimal(valid_webhook_data["amount"])
 
 
-def test_bank_webhook_duplicate_payment(client, valid_webhook_data, test_organization):
+def test_bank_webhook_duplicate_payment(auth_client, valid_webhook_data, test_organization):
     # Первый запрос
-    client.post(
+    auth_client.post(
         '/api/webhook/bank/',
         data=json.dumps(valid_webhook_data),
         content_type='application/json'
     )
 
     # Второй запрос с тем же operation_id
-    response = client.post(
+    response = auth_client.post(
         '/api/webhook/bank/',
         data=json.dumps(valid_webhook_data),
         content_type='application/json'
@@ -45,7 +45,7 @@ def test_bank_webhook_duplicate_payment(client, valid_webhook_data, test_organiz
     assert Payment.objects.count() == 1  # Не создался дубликат
 
 
-def test_bank_webhook_invalid_data(client):
+def test_bank_webhook_invalid_data(auth_client):
     invalid_data = {
         "operation_id": "invalid-uuid",
         "amount": "-100.00",
@@ -54,7 +54,7 @@ def test_bank_webhook_invalid_data(client):
         "document_date": "invalid-date"
     }
 
-    response = client.post(
+    response = auth_client.post(
         '/api/webhook/bank/',
         data=json.dumps(invalid_data),
         content_type='application/json'
@@ -69,10 +69,10 @@ def test_bank_webhook_invalid_data(client):
     assert "document_date" in errors
 
 
-def test_bank_webhook_new_organization(client, valid_webhook_data):
+def test_bank_webhook_new_organization(auth_client, valid_webhook_data):
     # Организации с таким ИНН нет в базе
     valid_webhook_data["payer_inn"] = "99999999999"
-    response = client.post(
+    response = auth_client.post(
         '/api/webhook/bank/',
         data=json.dumps(valid_webhook_data),
         content_type='application/json'
