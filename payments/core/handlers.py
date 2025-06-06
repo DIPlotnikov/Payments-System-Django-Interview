@@ -60,7 +60,7 @@ class OrganizationHandler:
         try:
             return Organization.objects.get(inn=inn).balance
         except Organization.DoesNotExist:
-            raise ValidationError(f"Организация с ИНН {inn} не найдена")
+            return None
         except Exception as e:
             raise e
 
